@@ -1,0 +1,17 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# HTML5 export artifacts
+*.wasm
+*.pck
+*.apple-touch-icon.png
+*.audio.position.worklet.js
+*.audio.worklet.js
+errands.html
+errands.js
+errands.png
+errands.icon.png
+
+# macOS
+.DS_Store
