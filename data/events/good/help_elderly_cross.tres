@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"help_elderly_cross"
+event_type = &"good_deed"
+display_name = "Help Elderly Cross"
+description = "An older person is waiting at the corner, struggling with their bags."
+prompt_text = "[E] Help them across"
+karma_reward = 15
+weight = 0.7
+npc_scene_path = ""

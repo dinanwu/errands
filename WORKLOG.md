@@ -1,5 +1,23 @@
 # Errands — Work Log
 
+## Phase 3: Event Triggers and Good Deeds (2026-03-28)
+
+**Goal:** Walk into zones, see prompts, press E, earn karma.
+
+### Completed
+
+- `scripts/data/event_data.gd` — EventData resource class
+- `scripts/data/errand_data.gd` — ErrandData resource class
+- `data/events/good/` — 4 good deed .tres files (pick_up_litter 5k, help_tourist 10k, help_elderly_cross 15k, catch_puppy 20k)
+- `data/errands/grocery_store.tres` — V1 errand definition
+- `scripts/autoloads/event_manager.gd` — Full implementation: loads events from disk, rolls random events (no recent repeats), spawns/dismisses prompt, wires to GameManager.add_karma()
+- `scenes/events/good_deed_prompt.tscn` / `.gd` — CanvasLayer prompt with event name + [E] text, auto-expires after 8s
+- `errand_level.tscn` — 4 EventTrigger (Area2D) zones placed along the street at grid intervals
+- `errand_level.gd` — Connects trigger body_entered signals; disables trigger after first entry
+- `player.gd` — E key calls EventManager.handle_interact()
+
+---
+
 ## Phase 2: Game State and HUD (2026-03-28)
 
 **Goal:** Karma counter on screen, manually awardable via debug key.

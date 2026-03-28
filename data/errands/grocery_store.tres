@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/errand_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"grocery_store"
+display_name = "Grocery Run"
+description = "Head down to the corner store and pick up a few things."
+player_mode = &"pedestrian"
+street_length = 30
+destination_name = "Corner Store"
+bad_event_ids = []
+good_event_ids = [&"pick_up_litter", &"help_elderly_cross", &"help_tourist", &"catch_puppy"]
