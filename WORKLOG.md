@@ -1,5 +1,18 @@
 # Errands — Work Log
 
+## Phase 2: Game State and HUD (2026-03-28)
+
+**Goal:** Karma counter on screen, manually awardable via debug key.
+
+### Completed
+
+- `scripts/data/weapon_data.gd` — WeaponData resource class (id, display_name, karma_cost, cooldown_seconds, effect_scene_path, tier)
+- `scenes/ui/hud.tscn` / `hud.gd` — CanvasLayer with top bar (KarmaLabel, ProgressLabel) and bottom WeaponBar placeholder
+- Wired HUD to `GameManager.karma_changed` signal
+- Debug K key (+10 karma) in `errand_level.gd`
+
+---
+
 ## Phase 1: Player Movement on Isometric Street (2026-03-21)
 
 **Goal:** Character moves on an isometric tile grid, camera follows.
