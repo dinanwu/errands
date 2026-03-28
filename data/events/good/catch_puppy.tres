@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"catch_puppy"
+event_type = &"good_deed"
+display_name = "Catch Runaway Puppy"
+description = "A tiny dog has slipped its leash and is darting into traffic."
+prompt_text = "[E] Grab the leash"
+karma_reward = 20
+weight = 0.5
+npc_scene_path = ""

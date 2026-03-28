@@ -17,10 +17,12 @@ const ISO_MATRIX = Transform2D(
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Click-to-move
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			_move_target = get_global_mouse_position()
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_E:
+			EventManager.handle_interact()
 
 
 func _physics_process(_delta: float) -> void:
