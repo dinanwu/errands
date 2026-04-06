@@ -1,26 +1,30 @@
 extends Node
 
-## Manages event pools, rolls random events, and spawns prompts.
+## Manages event pools, rolls random events, and spawns prompts / bad actors.
 ## EventTrigger zones in the level call try_spawn_event().
 ## Player calls handle_interact() when E is pressed.
-##
-## event_spawned / event_resolved are reserved for future systems (HUD juice, scoring).
 
 signal event_spawned(event_data: Resource, event_node: Node)
 signal event_resolved(event_data: Resource, was_acted_on: bool)
 signal good_deed_prompt_shown(event_data: Resource)
 signal good_deed_completed(event_data: Resource)
 signal good_deed_expired(event_data: Resource)
+signal bad_actor_spawned(event_data: Resource, actor_node: Node)
+signal bad_actor_punished(event_data: Resource)
 
-## Filtered pool for the current errand. Roll events from here.
 var good_event_pool: Array[Resource] = []
+var bad_event_pool: Array[Resource] = []
 var recent_events: Array[StringName] = []
 
 var _active_event: EventData = null
 var _prompt_instance: Node = null
+var _bad_actor_instance: Node = null
 
-## Full pool loaded from disk — source of truth for load_for_errand().
+## Set by errand_level.gd — parent node for spawning bad actor NPCs (Y-sorted).
+var spawn_parent: Node2D = null
+
 var _all_good_events: Array[Resource] = []
+var _all_bad_events: Array[Resource] = []
 
 const RECENT_EVENTS_MAX = 3
 const GOOD_DEED_PROMPT_SCENE = preload("res://scenes/events/good_deed_prompt.tscn")
@@ -31,31 +35,41 @@ func _ready() -> void:
 
 
 func _load_events() -> void:
-	var dir = DirAccess.open("res://data/events/good/")
+	_all_good_events = _load_events_from_dir("res://data/events/good/")
+	_all_bad_events = _load_events_from_dir("res://data/events/bad/")
+	good_event_pool = _all_good_events.duplicate()
+	bad_event_pool = _all_bad_events.duplicate()
+
+
+func _load_events_from_dir(path: String) -> Array[Resource]:
+	var events: Array[Resource] = []
+	var dir = DirAccess.open(path)
 	if dir == null:
-		return
+		return events
 	dir.list_dir_begin()
 	var filename = dir.get_next()
 	while filename != "":
 		if filename.ends_with(".tres"):
-			var resource = load("res://data/events/good/".path_join(filename))
+			var resource = load(path.path_join(filename))
 			if resource != null:
-				_all_good_events.append(resource)
+				events.append(resource)
 		filename = dir.get_next()
 	dir.list_dir_end()
-	good_event_pool = _all_good_events.duplicate()
+	return events
 
 
 func load_for_errand(errand: ErrandData) -> void:
-	## Filter the event pool to only the events listed in the errand definition.
 	good_event_pool = _all_good_events.filter(func(e: Resource) -> bool:
 		return e.id in errand.good_event_ids
+	)
+	bad_event_pool = _all_bad_events.filter(func(e: Resource) -> bool:
+		return e.id in errand.bad_event_ids
 	)
 	recent_events.clear()
 
 
-func try_spawn_event() -> bool:
-	## Returns true if an event was spawned, false if skipped (already active or empty pool).
+func try_spawn_event(trigger_position: Vector2 = Vector2.ZERO) -> bool:
+	## Returns true if an event was spawned, false if skipped.
 	if _active_event != null:
 		return false
 	var event = _roll_event()
@@ -63,14 +77,21 @@ func try_spawn_event() -> bool:
 		return false
 	_active_event = event
 	_track_recent(event.id)
-	_spawn_prompt(event)
-	good_deed_prompt_shown.emit(event)
-	event_spawned.emit(event, _prompt_instance)
+
+	if event.event_type == &"good_deed":
+		_spawn_prompt(event)
+		good_deed_prompt_shown.emit(event)
+	elif event.event_type == &"bad_actor":
+		_spawn_bad_actor(event, trigger_position)
+		bad_actor_spawned.emit(event, _bad_actor_instance)
+
+	var active_node = _prompt_instance if _prompt_instance else _bad_actor_instance
+	event_spawned.emit(event, active_node)
 	return true
 
 
 func handle_interact() -> void:
-	if _active_event == null:
+	if _active_event == null or _active_event.event_type != &"good_deed":
 		return
 	var event = _active_event
 	_dismiss_prompt()
@@ -80,13 +101,16 @@ func handle_interact() -> void:
 
 
 func _roll_event() -> EventData:
-	if good_event_pool.is_empty():
+	var combined: Array[Resource] = []
+	combined.append_array(good_event_pool)
+	combined.append_array(bad_event_pool)
+	if combined.is_empty():
 		return null
-	var available = good_event_pool.filter(func(e: Resource) -> bool:
+	var available = combined.filter(func(e: Resource) -> bool:
 		return not (e.id in recent_events)
 	)
 	if available.is_empty():
-		available = good_event_pool
+		available = combined
 	return _weighted_pick(available)
 
 
@@ -111,8 +135,21 @@ func _track_recent(event_id: StringName) -> void:
 func _spawn_prompt(event: EventData) -> void:
 	_prompt_instance = GOOD_DEED_PROMPT_SCENE.instantiate()
 	_prompt_instance.expired.connect(_on_prompt_expired)
-	add_child(_prompt_instance)       # @onready vars assigned here
-	_prompt_instance.setup(event)     # safe to call after add_child
+	add_child(_prompt_instance)
+	_prompt_instance.setup(event)
+
+
+func _spawn_bad_actor(event: EventData, spawn_pos: Vector2) -> void:
+	if not is_instance_valid(spawn_parent):
+		return
+	var scene = load(event.npc_scene_path)
+	if scene == null:
+		return
+	_bad_actor_instance = scene.instantiate()
+	_bad_actor_instance.global_position = spawn_pos
+	_bad_actor_instance.resolved.connect(_on_bad_actor_resolved)
+	spawn_parent.add_child(_bad_actor_instance)
+	_bad_actor_instance.setup(event)
 
 
 func _dismiss_prompt() -> void:
@@ -128,3 +165,12 @@ func _on_prompt_expired() -> void:
 	_prompt_instance = null
 	good_deed_expired.emit(event)
 	event_resolved.emit(event, false)
+
+
+func _on_bad_actor_resolved(was_punished: bool) -> void:
+	var event = _active_event
+	_active_event = null
+	_bad_actor_instance = null
+	if was_punished:
+		bad_actor_punished.emit(event)
+	event_resolved.emit(event, was_punished)

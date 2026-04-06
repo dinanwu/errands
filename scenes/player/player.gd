@@ -7,6 +7,11 @@ extends CharacterBody2D
 ## Click-to-move target (null when not active)
 var _move_target: Variant = null
 
+
+func _ready() -> void:
+	add_to_group("player")
+
+
 # Isometric transform: converts screen-space input to isometric world-space
 # Screen right → iso east (down-right), Screen up → iso north (up-right)
 const ISO_MATRIX = Transform2D(

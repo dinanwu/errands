@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"sidewalk_wall"
+event_type = &"bad_actor"
+display_name = "Blocking the Sidewalk"
+description = "A group walking shoulder-to-shoulder, refusing to let anyone pass."
+prompt_text = ""
+karma_reward = 0
+weight = 0.9
+npc_scene_path = "res://scenes/npcs/bad_actor.tscn"

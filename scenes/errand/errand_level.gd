@@ -12,6 +12,7 @@ const GROCERY_ERRAND = preload("res://data/errands/grocery_store.tres")
 
 func _ready() -> void:
 	EventManager.load_for_errand(GROCERY_ERRAND)
+	EventManager.spawn_parent = $Entities
 	for trigger in event_zones.get_children():
 		trigger.body_entered.connect(_on_event_trigger_entered.bind(trigger))
 
@@ -28,7 +29,11 @@ func _physics_process(delta: float) -> void:
 	camera.position = camera.position.lerp(player.position, 1.0 - exp(-10.0 * delta))
 
 
+func _exit_tree() -> void:
+	EventManager.spawn_parent = null
+
+
 func _on_event_trigger_entered(body: Node2D, trigger: Area2D) -> void:
 	if body == player:
-		if EventManager.try_spawn_event():
+		if EventManager.try_spawn_event(trigger.global_position):
 			trigger.set_deferred("monitoring", false)

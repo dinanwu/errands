@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/event_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"double_parking"
+event_type = &"bad_actor"
+display_name = "Double Parking"
+description = "This jerk double-parked and is blocking the entire lane."
+prompt_text = ""
+karma_reward = 0
+weight = 0.8
+npc_scene_path = "res://scenes/npcs/bad_actor.tscn"

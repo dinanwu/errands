@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = &"milkshake"
+display_name = "Milkshake"
+description = "A refreshing strawberry milkshake. Best served cold... on someone's head."
+karma_cost = 30
+cooldown_seconds = 5.0
+effect_scene_path = "res://scenes/weapons/milkshake.tscn"
+tier = 1

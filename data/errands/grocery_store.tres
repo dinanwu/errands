@@ -10,5 +10,5 @@ description = "Head down to the corner store and pick up a few things."
 player_mode = &"pedestrian"
 street_length = 30
 destination_name = "Corner Store"
-bad_event_ids = []
+bad_event_ids = [&"honking", &"littering", &"double_parking", &"sidewalk_wall", &"spitting"]
 good_event_ids = [&"pick_up_litter", &"help_elderly_cross", &"help_tourist", &"catch_puppy"]
